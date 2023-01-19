@@ -2,6 +2,7 @@ import Axios from "axios";
 import React from "react";
 
 import { Coin } from "@/typings";
+import { notFound } from "next/navigation";
 
 type PageProps = {
   params: {
@@ -9,17 +10,31 @@ type PageProps = {
   };
 };
 
-// This is a server-side render (rendered at request time)
+// Note: can force SSR, SSG or ISR using Fetch
+//  SSG w/ Fetch: default (no second parm) or add second param {cache: 'no-cache'}
+//  SSR w/ Fetch: add second param ({cache:'force-cache'})
+//  ISR w/ Fecth: add second param ({next: {revalidate: X}})
+
 const FetchCoin = async (coinId: string) => {
-  const data = await Axios.get(
-    `https://api.coinstats.app/public/v1/coins/${coinId}`
+  // Axios example
+  // const data = await Axios.get(
+  //   `https://api.coinstats.app/public/v1/coins/${coinId}`
+  // );
+  //const coin: Coin = await data.data.coin;
+
+  // Example using ISR
+  const data = await fetch(
+    `https://api.coinstats.app/public/v1/coins/${coinId}`,
+    { next: { revalidate: 60 } }
   );
-  const coin: Coin = await data.data.coin;
-  return coin;
+  const coin = await data.json();
+  return coin.coin;
 };
 
 async function CoinPage({ params: { coinId } }: PageProps) {
   const coin = await FetchCoin(coinId);
+
+  if (!coin) return notFound();
 
   return (
     <div className="p-2">
@@ -42,3 +57,17 @@ async function CoinPage({ params: { coinId } }: PageProps) {
 }
 
 export default CoinPage;
+
+// Statically prebuild the first ten coin pages
+export async function generateStaticParams() {
+  const data = await fetch(`https://api.coinstats.app/public/v1/coins/`);
+  const coins = await data.json();
+
+  const subsetOfCoins = coins.coins.splice(0, 10);
+
+  // est array of the following format: [(coinId: <id>),...]
+  const coinsArray = subsetOfCoins.map((coin: Coin) => ({
+    coinId: coin.id.toString(),
+  }));
+  return coinsArray;
+}
