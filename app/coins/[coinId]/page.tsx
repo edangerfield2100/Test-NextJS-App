@@ -38,7 +38,7 @@ async function CoinPage({ params: { coinId } }: PageProps) {
 
   return (
     <div className="p-2">
-      <ul className="m-4 p-2 bg-gray-300 border-2 border-gray-300 shadow-lg">
+      <ul className="m-4 p-2 bg-gray-300 rounded-lg border border-slate-800 shadow-md">
         <li>
           Name:<span className="pl-2">{coin.name}</span>
         </li>
