@@ -31,12 +31,14 @@ async function SearchResults({ params: { searchTerm } }: PageProps) {
     <div>
       <p className="m-4">You searched for {searchTerm} news.</p>
       <ol>
-        {results.news.map((item) => (
-          <li key={item.id} className="m-4">
-            <p className="font-bold">{item.title}</p>
-            <p>{item.description}</p>
-          </li>
-        ))}
+        {results &&
+          results.news &&
+          results.news.map((item) => (
+            <li key={item.id} className="m-4">
+              <p className="font-bold">{item.title}</p>
+              <p>{item.description}</p>
+            </li>
+          ))}
       </ol>
     </div>
   );
